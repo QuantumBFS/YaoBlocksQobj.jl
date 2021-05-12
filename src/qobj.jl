@@ -1,11 +1,38 @@
-"""
-todo
-1) yaoblocks gates to Schema Gate() - done
-2) Measure barrier and other stuff to schema - done
-3) constructors for Schema Experiment and general Schema Qobj(maybe)
-"""
+using Random
 
-function CreateExperiment(qc::AbstractBlock{N}, exp_header = nothing, exp_config = nothing) where N
+function CreateQobj(qc::Array{<:AbstractBlock{N}}; id::String = randstring(), header = nothing, nshots::Int = 1024, exp_header = nothing, exp_config = nothing) where N
+    experiments = CreateExperiment(qc, exp_header, exp_config)
+    config = ExpConfig(shots = nshots, memory_slots = length(experiments))
+    Qobj(;qobj_id = id, type = "QASM", schema_version = v"1", header, experiments = experiments, config = config)
+end
+
+function CreateExperiment(qc::Array{<:AbstractBlock{N}}, exp_header = nothing, exp_config = nothing) where N
+    experiments = Experiment[]
+    head = false
+    config = false
+    if exp_header !== nothing 
+        head = true 
+    elseif exp_config !== nothing 
+        config = true
+    end
+    
+    for i in 1:length(qc)
+        if head && config
+            exp = CreateExperiment!(qc[i], exp_header[i], exp_config[i])
+        elseif head && !config
+            exp = CreateExperiment!(qc[i], exp_header[i], exp_config)
+        elseif !head && config
+            exp = CreateExperiment!(qc[i], exp_header, exp_config[i])
+        else
+            exp = CreateExperiment!(qc[i], exp_header, exp_config)
+        end
+
+        push!(experiments, exp)
+    end
+    return experiments
+end
+
+function CreateExperiment!(qc::AbstractBlock{N}, exp_header = nothing, exp_config = nothing) where N
     exp_inst = generate_inst(qc)
     experiment = Experiment(;header = exp_header, config = exp_config, instructions = exp_inst)
     return experiment

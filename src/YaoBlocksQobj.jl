@@ -1,6 +1,6 @@
 module YaoBlocksQobj
 
-export CreateExperiment
+export CreateQobj
 
 using IBMQClient.Schema
 using YaoBlocks
