@@ -37,7 +37,8 @@ jobs:
       - run: |
           julia -e '
           using Pkg
-          cd(Pkg.dir("YaoBlocksQobj"))
+          import YaoBlocksQobj
+          cd(joinpath(dirname(pathof(YaoBlocksQobj)), "..", paths...))
           Pkg.add("Coverage")
           using Coverage
           Codecov.submit(Codecov.process_folder())'
