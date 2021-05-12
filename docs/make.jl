@@ -1,17 +1,17 @@
-using YaoBlocksQobj
+using YaoBlocksQobj, DocThemeIndigo
 using Documenter
+indigo = DocThemeIndigo.install(YaoBlocksQobj)
 
-DocMeta.setdocmeta!(YaoBlocksQobj, :DocTestSetup, :(using YaoBlocksQobj); recursive=true)
 
 makedocs(;
     modules=[YaoBlocksQobj],
-    authors="Arsh Sharma",
+    authors="Arsh Sharma <sharmarsh15@gmail.com> and contributors",
     repo="https://github.com/QuantumBFS/YaoBlocksQobj.jl/blob/{commit}{path}#{line}",
     sitename="YaoBlocksQobj.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://QuantumBFS.github.io/YaoBlocksQobj.jl",
-        assets=String[],
+        assets=String[indigo, "assets/default.css"],
     ),
     pages=[
         "Home" => "index.md",
@@ -19,5 +19,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/QuantumBFS.github.io/YaoBlocksQobj.jl",
+    repo="github.com/QuantumBFS/YaoBlocksQobj.jl",
 )

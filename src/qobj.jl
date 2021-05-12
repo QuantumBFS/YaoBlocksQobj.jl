@@ -1,11 +1,46 @@
 using Random
 
+"""
+    CreateQobj(qc, id, header, nshots, exp_header, exp_config)
+
+    Creates a `Qobj` based on the IBMQClient schema.
+    
+    - `qc`: An `Array` of `ChainBlock`(circuits that are to be run).
+    - `id`(optional): User generated run identifier.
+    - `header` (optional): User-defined structure that contains metadata on the job and is not used.
+    - `nshots`: Number of times to repeat the experiment (for some simulators this may
+    be limited to 1, e.g., a unitary simulator).
+    Each unitary gate has an efficient representation in this basis.
+    - `exp_header`(optional): Array of User-defined structure that contains metadata on each experiment and
+    is not used by the backend. The header will be passed through to the result data structure unchanged. 
+    For example, this may contain a fitting parameters for the experiment. In addition, this header can 
+    contain a mapping of backend memory and backend qubits to OpenQASM registers. 
+    This is because an OpenQASM circuit may contain multiple classical and quantum registers, 
+    but Qobj flattens them into a single memory and single set of qubits.
+    - `exp_config` (optional): An Array of Configuration structure for user settings that can be different in each
+    experiment. These will override the configuration settings of the whole job.
+"""
 function CreateQobj(qc::Array{<:AbstractBlock{N}}; id::String = randstring(), header = nothing, nshots::Int = 1024, exp_header = nothing, exp_config = nothing) where N
     experiments = CreateExperiment(qc, exp_header, exp_config)
     config = ExpConfig(shots = nshots, memory_slots = length(experiments))
     Qobj(;qobj_id = id, type = "QASM", schema_version = v"1", header, experiments = experiments, config = config)
 end
 
+"""
+    CreateExperiment(qc, exp_header, exp_config)
+
+    Returns and experiment type that consits of instructions.
+
+    - `qc`: An `Array` of `ChainBlock`(circuits that are to be run).
+    - `exp_header`(optional): Array of User-defined structure that contains metadata on each experiment and
+    is not used by the backend. The header will be passed through to the result data structure unchanged. 
+    For example, this may contain a fitting parameters for the experiment. In addition, this header can 
+    contain a mapping of backend memory and backend qubits to OpenQASM registers. 
+    This is because an OpenQASM circuit may contain multiple classical and quantum registers, 
+    but Qobj flattens them into a single memory and single set of qubits.
+    - `exp_config` (optional): An Array of Configuration structure for user settings that can be different in each
+    experiment. These will override the configuration settings of the whole job.
+"""
 function CreateExperiment(qc::Array{<:AbstractBlock{N}}, exp_header = nothing, exp_config = nothing) where N
     experiments = Experiment[]
     head = false
@@ -38,6 +73,13 @@ function CreateExperiment!(qc::AbstractBlock{N}, exp_header = nothing, exp_confi
     return experiment
 end
 
+"""
+    generate_inst(qc)
+
+    Parses the YaoIR into a list of IBMQ supported instructions
+
+    - `qc`: A `ChainBlock`(circuit that is to be run).
+"""
 function generate_inst(qc::AbstractBlock{N}) where N
     inst = Instruction[]
     generate_inst!(inst, basicstyle(qc), [0:N-1...], Int[])
