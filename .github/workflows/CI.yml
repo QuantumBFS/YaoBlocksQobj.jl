@@ -36,9 +36,12 @@ jobs:
       - uses: julia-actions/julia-runtest@v1
       - name: Coverage
       - run: |
-
-julia -e 'using Pkg; cd(Pkg.dir("YaoBlocksQobj")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
-
+          julia -e '
+          using Pkg
+          cd(Pkg.dir("YaoBlocksQobj"))
+          Pkg.add("Coverage")
+          using Coverage
+          Codecov.submit(Codecov.process_folder())'
   docs:
     name: Documentation
     runs-on: ubuntu-latest
