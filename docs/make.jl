@@ -14,7 +14,8 @@ makedocs(;
         assets=String[indigo, "assets/default.css"],
     ),
     pages=[
-        "Home" => "index.md",
+        "Quickstart" => "index.md",
+        "API References" => "refs.md",
     ],
 )
 
