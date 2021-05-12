@@ -1,11 +1,11 @@
 """
 todo
 1) yaoblocks gates to Schema Gate() - done
-2) Measure barrier and other stuff to schema- done
+2) Measure barrier and other stuff to schema - done
 3) constructors for Schema Experiment and general Schema Qobj(maybe)
 """
 
-function CreateExperiment(qc::AbstractBlock{N}, exp_header::Dict{String, Any} = Dict(), exp_config::Dict{String, Any} = Dict()) where N
+function CreateExperiment(qc::AbstractBlock{N}, exp_header = nothing, exp_config = nothing) where N
     exp_inst = generate_inst(qc)
     experiment = Experiment(;header = exp_header, config = exp_config, instructions = exp_inst)
     return experiment
