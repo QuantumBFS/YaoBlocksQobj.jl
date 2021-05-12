@@ -20,5 +20,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/QuantumBFS/YaoBlocksQobj.jl",
+    repo="github.com/QuantumBFS/YaoBlocksQobj.jl",devbranch = "main",
 )
