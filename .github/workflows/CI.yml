@@ -10,7 +10,6 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.1'
           - '1.6'
           - 'nightly'
         os:
@@ -35,6 +34,11 @@ jobs:
             ${{ runner.os }}-
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
+      - name: Coverage
+      run: |
+
+julia -e 'using Pkg; cd(Pkg.dir("YaoBlocksQobj")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+
   docs:
     name: Documentation
     runs-on: ubuntu-latest
@@ -58,6 +62,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
-after_success:
-- julia -e 'using Pkg; cd(Pkg.dir("YaoBlocksQobj")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
-
