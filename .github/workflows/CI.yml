@@ -58,3 +58,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+after_success:
+- julia -e 'using Pkg; cd(Pkg.dir("YaoBlocksQobj")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+
