@@ -6,11 +6,11 @@ DocMeta.setdocmeta!(YaoBlocksQobj, :DocTestSetup, :(using YaoBlocksQobj); recurs
 makedocs(;
     modules=[YaoBlocksQobj],
     authors="Arsh Sharma",
-    repo="https://github.com/Sov-trotter/YaoBlocksQobj.jl/blob/{commit}{path}#{line}",
+    repo="https://github.com/QuantumBFS/YaoBlocksQobj.jl/blob/{commit}{path}#{line}",
     sitename="YaoBlocksQobj.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://Sov-trotter.github.io/YaoBlocksQobj.jl",
+        canonical="https://QuantumBFS.github.io/YaoBlocksQobj.jl",
         assets=String[],
     ),
     pages=[
@@ -19,5 +19,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/Sov-trotter/YaoBlocksQobj.jl",
+    repo="github.com/QuantumBFS.github.io/YaoBlocksQobj.jl",
 )
