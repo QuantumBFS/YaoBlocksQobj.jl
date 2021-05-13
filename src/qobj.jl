@@ -1,7 +1,7 @@
 using Random
 
 """
-    CreateQobj(qc, id, header, nshots, exp_header, exp_config)
+    create_qobj(qc, id, header, nshots, exp_header, exp_config)
 
     Creates a `Qobj` based on the IBMQClient schema.
     
@@ -20,14 +20,14 @@ using Random
     - `exp_config` (optional): An Array of Configuration structure for user settings that can be different in each
     experiment. These will override the configuration settings of the whole job.
 """
-function CreateQobj(qc::Array{<:AbstractBlock{N}}; id::String = randstring(), header = nothing, nshots::Int = 1024, exp_header = nothing, exp_config = nothing) where N
-    experiments = CreateExperiment(qc, exp_header, exp_config)
+function create_qobj(qc::Array{<:AbstractBlock{N}}; id::String = randstring(), header = nothing, nshots::Int = 1024, exp_header = nothing, exp_config = nothing) where N
+    experiments = create_experiment(qc, exp_header, exp_config)
     config = ExpConfig(shots = nshots, memory_slots = length(experiments))
     Qobj(;qobj_id = id, type = "QASM", schema_version = v"1", header, experiments = experiments, config = config)
 end
 
 """
-    CreateExperiment(qc, exp_header, exp_config)
+    create_experiment(qc, exp_header, exp_config)
 
     Returns and experiment type that consits of instructions.
 
@@ -41,7 +41,7 @@ end
     - `exp_config` (optional): An Array of Configuration structure for user settings that can be different in each
     experiment. These will override the configuration settings of the whole job.
 """
-function CreateExperiment(qc::Array{<:AbstractBlock{N}}, exp_header = nothing, exp_config = nothing) where N
+function create_experiment(qc::Array{<:AbstractBlock{N}}, exp_header = nothing, exp_config = nothing) where N
     experiments = Experiment[]
     head = false
     config = false
@@ -53,13 +53,13 @@ function CreateExperiment(qc::Array{<:AbstractBlock{N}}, exp_header = nothing, e
     
     for i in 1:length(qc)
         if head && config
-            exp = CreateExperiment!(qc[i], exp_header[i], exp_config[i])
+            exp = create_experiment!(qc[i], exp_header[i], exp_config[i])
         elseif head && !config
-            exp = CreateExperiment!(qc[i], exp_header[i], exp_config)
+            exp = create_experiment!(qc[i], exp_header[i], exp_config)
         elseif !head && config
-            exp = CreateExperiment!(qc[i], exp_header, exp_config[i])
+            exp = create_experiment!(qc[i], exp_header, exp_config[i])
         else
-            exp = CreateExperiment!(qc[i], exp_header, exp_config)
+            exp = create_experiment!(qc[i], exp_header, exp_config)
         end
 
         push!(experiments, exp)
@@ -67,7 +67,7 @@ function CreateExperiment(qc::Array{<:AbstractBlock{N}}, exp_header = nothing, e
     return experiments
 end
 
-function CreateExperiment!(qc::AbstractBlock{N}, exp_header = nothing, exp_config = nothing) where N
+function create_experiment!(qc::AbstractBlock{N}, exp_header = nothing, exp_config = nothing) where N
     exp_inst = generate_inst(qc)
     experiment = Experiment(;header = exp_header, config = exp_config, instructions = exp_inst)
     return experiment

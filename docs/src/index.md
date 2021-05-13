@@ -29,5 +29,5 @@ exp_header = [Dict("description"=>"1")]
 3) Creating a Qobj
 
 ```julia
-q = CreateQobj([qc], id = "test_id", header= header, exp_header = exp_header)
+q = create_qobj([qc], id = "test_id", header= header, exp_header = exp_header)
 ```
