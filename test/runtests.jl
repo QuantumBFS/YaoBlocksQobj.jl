@@ -14,7 +14,7 @@ include("qobjtoqbir.jl")
     exp_header = [Dict("description"=>"1"), Dict("description"=>"2")]
     
     circuits = [qc, qc1]
-    q = CreateQobj(circuits, id = "test", header = header, exp_header = exp_header)
+    q = create_qobj(circuits, id = "test", header = header, exp_header = exp_header)
     
     experiments = q.experiments
     for i in 1:length(experiments)
