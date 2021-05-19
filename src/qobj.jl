@@ -1,11 +1,11 @@
-using UUIDs
+using Configurations, UUIDs
 
-IBMQClient.@option struct ExpOptions
-    id::String = uuid1()
-    header::IBMQClient.Maybe{Dict} = nothing
+@option struct ExpOptions
+    id::String = "$(uuid1())"
+    header::Maybe{Dict{String, Any}} = nothing
     nshots::Int = 1024
-    exp_header::IBMQClient.Maybe{Vector} = nothing
-    exp_config::IBMQClient.Maybe{Vector} = nothing
+    exp_header::Maybe{Vector{Dict{String, Any}}} = nothing
+    exp_config::Maybe{Vector{Dict{String, Any}}} = nothing
 end
 
 """
@@ -52,12 +52,12 @@ end
     - `exp_config` (optional): An Array of Configuration structure for user settings that can be different in each
     experiment. These will override the configuration settings of the whole job.
 """
-create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Nothing, exp_config::Nothing) where N = collect(create_experiment!(qc[i], nothing, nothing) for i in 1:length(qc))
-create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Array, exp_config::Array) where N =  collect(create_experiment!(qc[i], exp_header[i], exp_config[i]) for i in 1:length(qc))
-create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Nothing, exp_config::Array) where N = collect(create_experiment!(qc[i], nothing, exp_config[i]) for i in 1:length(qc))
-create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Array, exp_config::Nothing) where N = collect(create_experiment!(qc[i], exp_header[i], nothing) for i in 1:length(qc))
+create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Nothing, exp_config::Nothing) where N = collect(create_experiment(qc[i], nothing, nothing) for i in 1:length(qc))
+create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Array, exp_config::Array) where N =  collect(create_experiment(qc[i], exp_header[i], exp_config[i]) for i in 1:length(qc))
+create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Nothing, exp_config::Array) where N = collect(create_experiment(qc[i], nothing, exp_config[i]) for i in 1:length(qc))
+create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Array, exp_config::Nothing) where N = collect(create_experiment(qc[i], exp_header[i], nothing) for i in 1:length(qc))
 
-function create_experiment!(qc::AbstractBlock{N}, exp_header, exp_config) where N
+function create_experiment(qc::AbstractBlock{N}, exp_header, exp_config) where N
     exp_inst = generate_inst(qc)
     experiment = Experiment(;header = exp_header, config = exp_config, instructions = exp_inst)
     return experiment
