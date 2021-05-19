@@ -1,7 +1,7 @@
-using Random
+using UUIDs
 
 IBMQClient.@option struct ExpOptions
-    id::String
+    id::String = uuid1()
     header::IBMQClient.Maybe{Dict} = nothing
     nshots::Int = 1024
     exp_header::IBMQClient.Maybe{Vector} = nothing
