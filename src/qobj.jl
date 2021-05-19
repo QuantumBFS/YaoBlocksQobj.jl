@@ -2,10 +2,10 @@ using Configurations, UUIDs
 
 @option struct ExpOptions
     id::String = "$(uuid1())"
-    header::Maybe{Dict{String, Any}} = nothing
+    header::Maybe{Dict{String,Any}} = nothing
     nshots::Int = 1024
-    exp_header::Maybe{Vector{Dict{String, Any}}} = nothing
-    exp_config::Maybe{Vector{Dict{String, Any}}} = nothing
+    exp_header::Maybe{Vector{Dict{String,Any}}} = nothing
+    exp_config::Maybe{Vector{Dict{String,Any}}} = nothing
 end
 
 """
@@ -29,12 +29,20 @@ convert_to_qobj(qc, id, header, nshots, exp_header, exp_config)
     experiment. These will override the configuration settings of the whole job.
 """
 
-convert_to_qobj(qc::Vector{<:AbstractBlock}; kw...) = convert_to_qobj(qc, ExpOptions(;kw...))
+convert_to_qobj(qc::Vector{<:AbstractBlock}; kw...) =
+    convert_to_qobj(qc, ExpOptions(; kw...))
 
-function convert_to_qobj(qc::Vector{<:AbstractBlock{N}}, options::ExpOptions) where N
+function convert_to_qobj(qc::Vector{<:AbstractBlock{N}}, options::ExpOptions) where {N}
     experiments = create_experiment(qc, options.exp_header, options.exp_config)
     config = ExpConfig(shots = options.nshots, memory_slots = length(experiments)) #from the schema
-    Qobj(;qobj_id = options.id, type = "QASM", schema_version = v"1", options.header, experiments, config)
+    Qobj(;
+        qobj_id = options.id,
+        type = "QASM",
+        schema_version = v"1",
+        options.header,
+        experiments,
+        config,
+    )
 end
 
 """
@@ -52,14 +60,32 @@ end
     - `exp_config` (optional): An Array of Configuration structure for user settings that can be different in each
     experiment. These will override the configuration settings of the whole job.
 """
-create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Nothing, exp_config::Nothing) where N = collect(create_experiment(qc[i], nothing, nothing) for i in 1:length(qc))
-create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Array, exp_config::Array) where N =  collect(create_experiment(qc[i], exp_header[i], exp_config[i]) for i in 1:length(qc))
-create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Nothing, exp_config::Array) where N = collect(create_experiment(qc[i], nothing, exp_config[i]) for i in 1:length(qc))
-create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Array, exp_config::Nothing) where N = collect(create_experiment(qc[i], exp_header[i], nothing) for i in 1:length(qc))
+create_experiment(
+    qc::Vector{<:AbstractBlock{N}},
+    exp_header::Nothing,
+    exp_config::Nothing,
+) where {N} = collect(create_experiment(qc[i], nothing, nothing) for i = 1:length(qc))
+create_experiment(
+    qc::Vector{<:AbstractBlock{N}},
+    exp_header::Array,
+    exp_config::Array,
+) where {N} =
+    collect(create_experiment(qc[i], exp_header[i], exp_config[i]) for i = 1:length(qc))
+create_experiment(
+    qc::Vector{<:AbstractBlock{N}},
+    exp_header::Nothing,
+    exp_config::Array,
+) where {N} = collect(create_experiment(qc[i], nothing, exp_config[i]) for i = 1:length(qc))
+create_experiment(
+    qc::Vector{<:AbstractBlock{N}},
+    exp_header::Array,
+    exp_config::Nothing,
+) where {N} = collect(create_experiment(qc[i], exp_header[i], nothing) for i = 1:length(qc))
 
-function create_experiment(qc::AbstractBlock{N}, exp_header, exp_config) where N
+function create_experiment(qc::AbstractBlock{N}, exp_header, exp_config) where {N}
     exp_inst = generate_inst(qc)
-    experiment = Experiment(;header = exp_header, config = exp_config, instructions = exp_inst)
+    experiment =
+        Experiment(; header = exp_header, config = exp_config, instructions = exp_inst)
     return experiment
 end
 
@@ -70,7 +96,7 @@ end
 
     - `qc`: A `ChainBlock`(circuit that is to be run).
 """
-function generate_inst(qc::AbstractBlock{N}) where N
+function generate_inst(qc::AbstractBlock{N}) where {N}
     inst = Instruction[]
     generate_inst!(inst, basicstyle(qc), [0:N-1...], Int[])
     return inst
@@ -87,11 +113,16 @@ function generate_inst!(inst, blk::PutBlock{N,M}, locs, controls) where {N,M}
 end
 
 function generate_inst!(inst, blk::ControlBlock{N,GT,C}, locs, controls) where {N,GT,C}
-    any(==(0),blk.ctrl_config) && error("Inverse Control used in Control gate context") 
-    generate_inst!(inst, blk.content, sublocs(blk.locs, locs), [controls..., sublocs(blk.ctrl_locs, locs)...])
+    any(==(0), blk.ctrl_config) && error("Inverse Control used in Control gate context")
+    generate_inst!(
+        inst,
+        blk.content,
+        sublocs(blk.locs, locs),
+        [controls..., sublocs(blk.ctrl_locs, locs)...],
+    )
 end
 
-function generate_inst!(inst, m::YaoBlocks.Measure{N}, locs, controls) where N
+function generate_inst!(inst, m::YaoBlocks.Measure{N}, locs, controls) where {N}
     # memory:  List of memory slots in which to store the measurement results (mustbe the same length as qubits).  
     mlocs = sublocs(m.locations isa AllLocs ? [1:N...] : [m.locations...], locs)
     (m.operator isa ComputationalBasis) || error("measuring an operator is not supported")
@@ -102,11 +133,23 @@ end
 
 # IBMQ Chip only supports ["id", "u1", "u2", "u3", "cx"]
 # x, y, z and control x, y, z, id, t, swap and other primitive gates
-for (GT, NAME, MAXC) in [(:XGate, "x", 2), (:YGate, "y", 2), (:ZGate, "z", 2),
-                         (:I2Gate, "id", 0), (:TGate, "t", 0), (:SWAPGate, "swap", 0)]
+for (GT, NAME, MAXC) in [
+    (:XGate, "x", 2),
+    (:YGate, "y", 2),
+    (:ZGate, "z", 2),
+    (:I2Gate, "id", 0),
+    (:TGate, "t", 0),
+    (:SWAPGate, "swap", 0),
+]
     @eval function generate_inst!(inst, ::$GT, locs, controls)
         if length(controls) <= $MAXC
-            push!(inst, Gate(name = "c"^(length(controls))*$NAME, qubits = [controls..., locs...]))
+            push!(
+                inst,
+                Gate(
+                    name = "c"^(length(controls)) * $NAME,
+                    qubits = [controls..., locs...],
+                ),
+            )
         else
             error("too many control bits!")
         end
@@ -114,15 +157,23 @@ for (GT, NAME, MAXC) in [(:XGate, "x", 2), (:YGate, "y", 2), (:ZGate, "z", 2),
 end
 
 # rotation gates
-for (GT, NAME, PARAMS, MAXC) in [(:(RotationGate{1, T, XGate} where T), "u3", :([b.theta, -π/2, π/2]), 0),
-                           (:(RotationGate{1, T, YGate} where T), "u3", :([b.theta, 0, 0]), 0),
-                           (:(RotationGate{1, T, ZGate} where T), "u1", :([b.theta]), 0),
-                           (:(ShiftGate), "u1", :([b.theta]), 1),
-                           (:(HGate), "u2", :([0, π]), 0),
-                          ]
+for (GT, NAME, PARAMS, MAXC) in [
+    (:(RotationGate{1,T,XGate} where {T}), "u3", :([b.theta, -π / 2, π / 2]), 0),
+    (:(RotationGate{1,T,YGate} where {T}), "u3", :([b.theta, 0, 0]), 0),
+    (:(RotationGate{1,T,ZGate} where {T}), "u1", :([b.theta]), 0),
+    (:(ShiftGate), "u1", :([b.theta]), 1),
+    (:(HGate), "u2", :([0, π]), 0),
+]
     @eval function generate_inst!(inst, b::$GT, locs, controls)
         if length(controls) <= $MAXC
-            push!(inst, Gate(name = "c"^(length(controls))*$NAME, qubits = [controls..., locs...], params = $PARAMS))
+            push!(
+                inst,
+                Gate(
+                    name = "c"^(length(controls)) * $NAME,
+                    qubits = [controls..., locs...],
+                    params = $PARAMS,
+                ),
+            )
         else
             error("too many control bits! got $controls (length > $($(MAXC)))")
         end
@@ -132,5 +183,5 @@ end
 sublocs(subs, locs) = [locs[i] for i in subs]
 
 function basicstyle(blk::AbstractBlock)
-	YaoBlocks.Optimise.simplify(blk, rules=[YaoBlocks.Optimise.to_basictypes])
+    YaoBlocks.Optimise.simplify(blk, rules = [YaoBlocks.Optimise.to_basictypes])
 end

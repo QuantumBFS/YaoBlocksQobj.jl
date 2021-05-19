@@ -4,21 +4,16 @@ indigo = DocThemeIndigo.install(YaoBlocksQobj)
 
 
 makedocs(;
-    modules=[YaoBlocksQobj],
-    authors="Arsh Sharma <sharmarsh15@gmail.com> and contributors",
-    repo="https://github.com/QuantumBFS/YaoBlocksQobj.jl/blob/{commit}{path}#{line}",
-    sitename="YaoBlocksQobj.jl",
-    format=Documenter.HTML(;
-        prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://QuantumBFS.github.io/YaoBlocksQobj.jl",
-        assets=String[indigo, "assets/default.css"],
+    modules = [YaoBlocksQobj],
+    authors = "Arsh Sharma <sharmarsh15@gmail.com> and contributors",
+    repo = "https://github.com/QuantumBFS/YaoBlocksQobj.jl/blob/{commit}{path}#{line}",
+    sitename = "YaoBlocksQobj.jl",
+    format = Documenter.HTML(;
+        prettyurls = get(ENV, "CI", "false") == "true",
+        canonical = "https://QuantumBFS.github.io/YaoBlocksQobj.jl",
+        assets = String[indigo, "assets/default.css"],
     ),
-    pages=[
-        "Quickstart" => "index.md",
-        "API References" => "refs.md",
-    ],
+    pages = ["Quickstart" => "index.md", "API References" => "refs.md"],
 )
 
-deploydocs(;
-    repo="github.com/QuantumBFS/YaoBlocksQobj.jl",devbranch = "main",
-)
+deploydocs(; repo = "github.com/QuantumBFS/YaoBlocksQobj.jl", devbranch = "main")
