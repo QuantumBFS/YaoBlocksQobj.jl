@@ -1,7 +1,15 @@
 using Random
 
+IBMQClient.@option struct ExpOptions
+    id::String
+    header::IBMQClient.Maybe{Dict} = nothing
+    nshots::Int = 1024
+    exp_header::IBMQClient.Maybe{Vector} = nothing
+    exp_config::IBMQClient.Maybe{Vector} = nothing
+end
+
 """
-    create_qobj(qc, id, header, nshots, exp_header, exp_config)
+convert_to_qobj(qc, id, header, nshots, exp_header, exp_config)
 
     Creates a `Qobj` based on the IBMQClient schema.
     
@@ -20,10 +28,13 @@ using Random
     - `exp_config` (optional): An Array of Configuration structure for user settings that can be different in each
     experiment. These will override the configuration settings of the whole job.
 """
-function create_qobj(qc::Array{<:AbstractBlock{N}}; id::String = randstring(), header = nothing, nshots::Int = 1024, exp_header = nothing, exp_config = nothing) where N
-    experiments = create_experiment(qc, exp_header, exp_config)
-    config = ExpConfig(shots = nshots, memory_slots = length(experiments))
-    Qobj(;qobj_id = id, type = "QASM", schema_version = v"1", header, experiments = experiments, config = config)
+
+convert_to_qobj(qc::Vector{<:AbstractBlock}; kw...) = convert_to_qobj(qc, ExpOptions(;kw...))
+
+function convert_to_qobj(qc::Vector{<:AbstractBlock{N}}, options::ExpOptions) where N
+    experiments = create_experiment(qc, options.exp_header, options.exp_config)
+    config = ExpConfig(shots = options.nshots, memory_slots = length(experiments)) #from the schema
+    Qobj(;qobj_id = options.id, type = "QASM", schema_version = v"1", options.header, experiments, config)
 end
 
 """
@@ -41,33 +52,12 @@ end
     - `exp_config` (optional): An Array of Configuration structure for user settings that can be different in each
     experiment. These will override the configuration settings of the whole job.
 """
-function create_experiment(qc::Array{<:AbstractBlock{N}}, exp_header = nothing, exp_config = nothing) where N
-    experiments = Experiment[]
-    head = false
-    config = false
-    if exp_header !== nothing 
-        head = true 
-    elseif exp_config !== nothing 
-        config = true
-    end
-    
-    for i in 1:length(qc)
-        if head && config
-            exp = create_experiment!(qc[i], exp_header[i], exp_config[i])
-        elseif head && !config
-            exp = create_experiment!(qc[i], exp_header[i], exp_config)
-        elseif !head && config
-            exp = create_experiment!(qc[i], exp_header, exp_config[i])
-        else
-            exp = create_experiment!(qc[i], exp_header, exp_config)
-        end
+create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Nothing, exp_config::Nothing) where N = collect(create_experiment!(qc[i], nothing, nothing) for i in 1:length(qc))
+create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Array, exp_config::Array) where N =  collect(create_experiment!(qc[i], exp_header[i], exp_config[i]) for i in 1:length(qc))
+create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Nothing, exp_config::Array) where N = collect(create_experiment!(qc[i], nothing, exp_config[i]) for i in 1:length(qc))
+create_experiment(qc::Vector{<:AbstractBlock{N}}, exp_header::Array, exp_config::Nothing) where N = collect(create_experiment!(qc[i], exp_header[i], nothing) for i in 1:length(qc))
 
-        push!(experiments, exp)
-    end
-    return experiments
-end
-
-function create_experiment!(qc::AbstractBlock{N}, exp_header = nothing, exp_config = nothing) where N
+function create_experiment!(qc::AbstractBlock{N}, exp_header, exp_config) where N
     exp_inst = generate_inst(qc)
     experiment = Experiment(;header = exp_header, config = exp_config, instructions = exp_inst)
     return experiment
