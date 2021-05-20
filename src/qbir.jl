@@ -1,3 +1,5 @@
+using Yao
+
 mutable struct U1{T<:Number} <: PrimitiveBlock{1}
     lambda::T
 end
@@ -77,7 +79,20 @@ YaoBlocks.@dumpload_fallback U1 U1
 YaoBlocks.@dumpload_fallback U2 U2
 YaoBlocks.@dumpload_fallback U3 U3
 
-function inst2qbir(inst)
+"""
+    convert_to_qbir(inst)
+
+Converts Qobj based instructions back to YaoIR.
+    
+- `inst`: The Qobj based instructions.
+
+For Example:
+```julia
+q = convert_to_qobj(chain(1, put(1 => H))) 
+ir = q.experiments[1].instructions |> convert_to_qbir
+```
+"""
+function convert_to_qbir(inst)
     n = maximum(x -> maximum(x.qubits), inst) + 1
     chain(
         n,

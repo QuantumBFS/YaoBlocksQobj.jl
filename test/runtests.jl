@@ -1,8 +1,6 @@
 using Yao, YaoBlocksQobj
 using Test
 
-include("qobjtoqbir.jl")
-
 @testset "YaoBlocksQobj.jl" begin
     qc = chain(
         3,
@@ -30,7 +28,7 @@ include("qobjtoqbir.jl")
         @test exp.header == Dict("description" => "$i")
         @test exp.config === nothing
         inst = exp.instructions
-        ir = inst2qbir(inst)
+        ir = convert_to_qbir(inst)
         @test ir == circuits[i]
     end
 
