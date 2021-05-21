@@ -1,7 +1,7 @@
 using Configurations, UUIDs
 
 @option struct ExpOptions
-    id::String = "$(uuid1())"
+    id::String = string(uuid1())
     header::Maybe{Dict{String,Any}} = nothing
     nshots::Int = 1024
     exp_header::Maybe{Vector{Dict{String,Any}}} = nothing
