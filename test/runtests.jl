@@ -1,4 +1,4 @@
-using IBMQClient.Schema, Yao, YaoBlocksQobj
+using IBMQClient, Yao, YaoBlocksQobj
 using Test
 
 @testset "YaoBlocksQobj.jl" begin
