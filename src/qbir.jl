@@ -109,7 +109,7 @@ function convert_to_qbir(inst)
                     locs[nc+1:end] => name_index(name[nc+1:end], x.params),
                 )
             elseif name == "measure"
-                put(n, locs =>Yao.Measure(locs...)) 
+                put(n, locs => Yao.Measure(locs...))
             else
                 put(n, locs => name_index(name, x.params))
             end
